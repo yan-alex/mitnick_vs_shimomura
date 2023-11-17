@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5C02C15F2B051F08000AD421 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 5C02C15E2B051F08000AD421 /* main.c */; };
+		5CC02A652B079EDB0002740D /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 5CC02A642B079E9F0002740D /* main.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,7 +24,9 @@
 
 /* Begin PBXFileReference section */
 		5C02C15B2B051F08000AD421 /* solutionXcode */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = solutionXcode; sourceTree = BUILT_PRODUCTS_DIR; };
-		5C02C15E2B051F08000AD421 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		5C73BA6C2B07A04700B57EF2 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../../../../.Trash/solutionXcode/Makefile; sourceTree = "<group>"; };
+		5CC028852B079E9D0002740D /* main */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = main; sourceTree = "<group>"; };
+		5CC02A642B079E9F0002740D /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,7 +43,9 @@
 		5C02C1522B051F08000AD421 = {
 			isa = PBXGroup;
 			children = (
-				5C02C15D2B051F08000AD421 /* solutionXcode */,
+				5CC028852B079E9D0002740D /* main */,
+				5CC02A642B079E9F0002740D /* main.c */,
+				5C73BA6C2B07A04700B57EF2 /* Makefile */,
 				5C02C15C2B051F08000AD421 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -52,14 +56,6 @@
 				5C02C15B2B051F08000AD421 /* solutionXcode */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		5C02C15D2B051F08000AD421 /* solutionXcode */ = {
-			isa = PBXGroup;
-			children = (
-				5C02C15E2B051F08000AD421 /* main.c */,
-			);
-			path = solutionXcode;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -119,7 +115,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5C02C15F2B051F08000AD421 /* main.c in Sources */,
+				5CC02A652B079EDB0002740D /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -238,7 +234,11 @@
 		5C02C1632B051F08000AD421 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_STYLE = Automatic;
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				OTHER_LDFLAGS = "-lnet";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -246,7 +246,11 @@
 		5C02C1642B051F08000AD421 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_STYLE = Automatic;
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				OTHER_LDFLAGS = "-lnet";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
