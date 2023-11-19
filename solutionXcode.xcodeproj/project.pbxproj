@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		5CC02A652B079EDB0002740D /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 5CC02A642B079E9F0002740D /* main.c */; };
+		5CCB879A2B092785002AF6CE /* libpcap.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CCB87992B092785002AF6CE /* libpcap.tbd */; };
+		5CCB87A02B0A5977002AF6CE /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 5CCB879F2B0A5977002AF6CE /* Makefile */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,9 +26,9 @@
 
 /* Begin PBXFileReference section */
 		5C02C15B2B051F08000AD421 /* solutionXcode */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = solutionXcode; sourceTree = BUILT_PRODUCTS_DIR; };
-		5C73BA6C2B07A04700B57EF2 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../../../../.Trash/solutionXcode/Makefile; sourceTree = "<group>"; };
-		5CC028852B079E9D0002740D /* main */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = main; sourceTree = "<group>"; };
 		5CC02A642B079E9F0002740D /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		5CCB87992B092785002AF6CE /* libpcap.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libpcap.tbd; path = usr/lib/libpcap.tbd; sourceTree = SDKROOT; };
+		5CCB879F2B0A5977002AF6CE /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -34,6 +36,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5CCB879A2B092785002AF6CE /* libpcap.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -43,10 +46,9 @@
 		5C02C1522B051F08000AD421 = {
 			isa = PBXGroup;
 			children = (
-				5CC028852B079E9D0002740D /* main */,
 				5CC02A642B079E9F0002740D /* main.c */,
-				5C73BA6C2B07A04700B57EF2 /* Makefile */,
 				5C02C15C2B051F08000AD421 /* Products */,
+				5CCB87982B092785002AF6CE /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -56,6 +58,15 @@
 				5C02C15B2B051F08000AD421 /* solutionXcode */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		5CCB87982B092785002AF6CE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5CCB87992B092785002AF6CE /* libpcap.tbd */,
+				5CCB879F2B0A5977002AF6CE /* Makefile */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -115,6 +126,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5CCB87A02B0A5977002AF6CE /* Makefile in Sources */,
 				5CC02A652B079EDB0002740D /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -236,7 +248,10 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				HEADER_SEARCH_PATHS = /usr/local/include;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include,
+					"/opt/homebrew/opt/libpcap/include\n/opt/homebrew/opt/libpcap/include\n/opt/homebrew/opt/libpcap/include\n/opt/homebrew/opt/libpcap/include\n",
+				);
 				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				OTHER_LDFLAGS = "-lnet";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -248,7 +263,10 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				HEADER_SEARCH_PATHS = /usr/local/include;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include,
+					"/opt/homebrew/opt/libpcap/include\n/opt/homebrew/opt/libpcap/include\n/opt/homebrew/opt/libpcap/include\n/opt/homebrew/opt/libpcap/include\n",
+				);
 				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				OTHER_LDFLAGS = "-lnet";
 				PRODUCT_NAME = "$(TARGET_NAME)";
