@@ -1,0 +1,22 @@
+Yan Lanna Alexandre
+y.lanna.alexandre@student.vu.nl
+yla203
+2773394
+
+The attack is implemented as follows
+-DDoS Attack (Distributed Denial of Service):
+The start_ddos function uses libnet to send 10 TCP SYN packets with the payload "disable" to the server, disabling it.
+-TCP ISN Probe:
+
+The predict function predicts the next sequence number by analyzing the sequence numbers of SYN/ACK packets received from the xterminal IP (X_TERMINAL_IP). It sends multiple SYN packets, reads the responses, and 
+calculates the second-order difference of sequence numbers to identify a constant pattern, marked by a repeatind second order difference of 29281. There is an added delay of 1 second between each syn packet, which 
+proved to improve reliability by keeping the timing more consistent. Once a pattern is identified, it predicts the next sequence number. If no pattern is identified within a couple of tries, it recursevely calls itself 
+with a small sleep delay, to try to find a pattern again.
+
+-Backdoor Injection:
+Now a SYN packet is sent, spoofed as the server, to the xterminal IP. After receiving the SYN/ACK response, a spoofed ACK packet is sent with the predicted seq number + 1 ( +1 because of the phantom byte), and with the flag ACK and PUSH (to push the payload to the application layer immediately). The payload is "0\0tsutomu\0tsutomu\0echo + + >> .rhosts\0" (by https://linux.die.net/man/8/rshd documentation). 
+
+Steps taken to to cleanup any traces of the attack are :
+- Using "nano .rhosts" to edit the .rhosts file and remove the injected + + line. 
+- stopping the dos, so that the server is active again. 
+- retrieving the secret.txt file in a non descructive manner (running 'cat secret.txt' and copying content), so that the file will stay there and there will be no extra traffic logs.

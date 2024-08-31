@@ -31,6 +31,7 @@
 		5CCB879F2B0A5977002AF6CE /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		5CCB87A12B0BFC45002AF6CE /* go.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = go.sh; sourceTree = "<group>"; };
 		5CCB87A22B0C0379002AF6CE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		5CCB87A32B0C1DC1002AF6CE /* secret.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = secret.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +49,7 @@
 		5C02C1522B051F08000AD421 = {
 			isa = PBXGroup;
 			children = (
+				5CCB87A32B0C1DC1002AF6CE /* secret.txt */,
 				5CCB87A22B0C0379002AF6CE /* README.md */,
 				5CCB87A12B0BFC45002AF6CE /* go.sh */,
 				5CC02A642B079E9F0002740D /* main.c */,
