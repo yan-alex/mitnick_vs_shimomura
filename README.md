@@ -3,7 +3,8 @@
 
 This repo recreates Mitnick's hack using C and libnet.
 
-The attack is implemented as follows
+The attack is implemented as follows:
+
 -DDoS Attack (Distributed Denial of Service):
 The start_ddos function uses libnet to send 10 TCP SYN packets with the payload "disable" to the server, disabling it.
 -TCP ISN Probe:
